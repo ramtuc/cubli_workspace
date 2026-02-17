@@ -17,6 +17,9 @@ class CubliSimulation:
         
         # 2. 床とCubliの読み込み
         self.planeId = p.loadURDF("plane.urdf")
+
+        # カメラ位置の設定
+        p.resetDebugVisualizerCamera(cameraDistance=0.5, cameraYaw=80, cameraPitch=-30, cameraTargetPosition=[0,0,0])
         self.reset()
 
     def reset(self):
