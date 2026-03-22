@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>day4</name>
+  <version>0.0.1</version>
+  <description>cubli simulation</description>
+  <maintainer email="user@example.com">user</maintainer>
+  <license>MIT</license>
+</package>
