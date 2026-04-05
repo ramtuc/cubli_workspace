@@ -105,7 +105,7 @@ while True:
             p.setJointMotorControl2(
                 boxId, 0, p.TORQUE_CONTROL, force=target_torque  # joint_x
             )
-            p.setJointMotorControl2(
+            p.setJointMotorControl2(    
                 boxId, 1, p.TORQUE_CONTROL, force=target_torque  # joint_y
             )
             p.setJointMotorControl2(
