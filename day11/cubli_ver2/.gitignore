@@ -1,0 +1,13 @@
+# STM32CubeIDE build output
+Debug/
+Release/
+
+# Eclipse/CubeIDE workspace settings (machine-specific)
+.settings/
+
+# Binary artifacts
+*.elf
+*.bin
+*.hex
+*.map
+*.list

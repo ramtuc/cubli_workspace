@@ -378,7 +378,7 @@ try:
                     p.setJointMotorControl2(boxId, i, p.TORQUE_CONTROL, force=0)
                 is_running = False
                 print(f"*** FALLEN *** Roll:{err_r_deg:.1f}° Pitch:{err_p_deg:.1f}° → Motors stopped.")
-            elif step_count % 1 == 10:
+            elif step_count % 10 == 1:
                 print(f"Err Roll:{err_r_deg:5.1f} Pitch:{err_p_deg:5.1f} Yaw:{err_y_deg:5.1f} | "
                       f"Torque Roll:{t_x:6.3f} Pitch:{t_y:6.3f} Yaw:{t_z:6.3f}")
 
