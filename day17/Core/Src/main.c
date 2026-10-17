@@ -192,8 +192,13 @@ int main(void)
 
     printf("=== Day 17: Current Control Mode Start ===\r\n");
 
-    // ADCトリガ用 (中心でトリガ)
-    TIM1->CCR4 = (uint32_t)(PWM_PERIOD * 0.5f);
+    // ADCトリガ用。CH4 は PWM Mode 1 なので、ダウンカウント中に
+    // CNT が CCR4 を下回った瞬間に TRGO2 が立ち上がる。
+    // CCR4=200 → 谷底の約 1.2us 手前でトリガし、3相の変換ウィンドウが
+    // 谷底をまたぐ形になる（ローサイド ON 期間を外さないため）。
+    //   旧: PWM_PERIOD*0.5f = 2125 → 谷底の 12.5us 手前（Duty>50% の相で
+    //       ハイサイド ON のまま読んでいた）
+    TIM1->CCR4 = 200;
 
     // PWM開始
     HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
