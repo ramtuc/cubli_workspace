@@ -42,9 +42,10 @@
 #define AS5600_ADDR (0x36 << 1)
 
 // --- 制御ゲイン (Day 17設定) ---
-#define KP_GAIN 0.6f          // Pゲイン: まずは1.0で様子見
+#define KP_GAIN 1.0f          // Pゲイン: 実機で 0.6 から引き上げ
 #define KI_GAIN 1.3f         // Iゲイン: 積分で誤差を潰す
-#define IQ_TARGET 0.2f        // 目標電流: 0.2A (指で止めると抵抗を感じるレベル)
+#define IQ_TARGET 0.6f        // 定数トルク指令で試す場合の目標電流 [A]
+                              // ※バネ動作時は未使用（Iq_ref を計算で求める）
 
 // 電圧制限 (12V電源の半分くらいを上限に、過剰な電圧を防ぐ)
 #define VOLTAGE_LIMIT 6.0f
@@ -97,6 +98,13 @@ float offset_w = 2048.0f;
 
 // 制御有効フラグ
 volatile uint8_t foc_enable = 0;
+
+// --- サンプリング位置の検証用（制御には使わない。確認後は削除可） ---
+// ISR が走った時点の TIM1 カウンタと計数方向を記録する。
+// TRGO2=OC4REF / CCR4=2125 の場合、理論上は谷底の 12.5us 手前
+// （ダウンカウント中の CNT≈2124）でトリガされるはず。
+volatile uint32_t g_debug_cnt = 0;
+volatile uint8_t  g_debug_dir = 0;   // 0 = アップカウント, 1 = ダウンカウント
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -270,8 +278,10 @@ int main(void)
           count++;
           if(count >= 50) { // ループ速度によるが適度に間引く
               // ISRで計算された電流値やDutyを表示
-              printf("Th:%.2f Id:%.2f Iq:%.2f du:%.2f\r\n",
-                      g_theta_elec, g_Id, g_Iq, g_duty_u);
+              // CNT/DIR はサンプリング位置の検証用（確認後は削除可）
+              printf("Th:%.2f Id:%.2f Iq:%.2f du:%.2f CNT:%lu DIR:%u\r\n",
+                      g_theta_elec, g_Id, g_Iq, g_duty_u,
+                      (unsigned long)g_debug_cnt, (unsigned)g_debug_dir);
               count = 0;
           }
           // Delayは入れない（角度更新を早くするため）
@@ -657,6 +667,10 @@ void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
     // ADC1以外からの呼び出しや、FOC無効時は何もしない
     if (hadc->Instance != ADC1 || !foc_enable) return;
+
+    // サンプリング位置の検証用（最優先で読む。制御には影響しない）
+    g_debug_cnt = TIM1->CNT;
+    g_debug_dir = (TIM1->CR1 & TIM_CR1_DIR) ? 1 : 0;
 
     // 1. 電流取得 & [A]変換
 
